@@ -22,7 +22,7 @@ public class Tokenizer {
 
     public List<String> tokenize(String sentenceStr) {
         // Clean up wiki markup
-        sentenceStr = sentenceStr.replaceAll(WIKI_MARKUP_REGEX, "");
+        sentenceStr = sentenceStr.replaceAll(WIKI_MARKUP_REGEX, " ");
         // Lemmatize sentence
         Sentence sentenceSent  = new Sentence(sentenceStr);
         List<String> lemmas = sentenceSent.lemmas();
