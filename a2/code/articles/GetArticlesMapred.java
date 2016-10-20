@@ -44,8 +44,6 @@ public class GetArticlesMapred {
 	//@formatter:on
 	public static class GetArticlesMapper extends Mapper<LongWritable, WikipediaPage, Text, Text> {
 		
-		//a hashmap to store titles and their articles
-		//public static HashMap<String, String> peopleArticles;
 		//a hashset to store the names that we're interested in
 		private HashSet<String> names;
 		
@@ -78,24 +76,6 @@ public class GetArticlesMapred {
 			}
 			sc.close();
 			
-			
-			/*
-			//load wiki-small
-			String wikiFile = "wiki-small";
-			String wikiUrl = cl.getResource(wikiFile).getFile();
-			
-			//create a jar file that contains wiki-small so that docker can find it
-			String jarUrl = wikiUrl.substring(5, wikiUrl.length() - wikiFile.length() - 2);
-			JarFile wikiJar = new JarFile(new File(jarUrl));
-			
-			peopleArticles = new HashMap<String, String>();
-			*/
-			
-			
-			//for every wikipedia page in wikiFile
-			//add article name, article text to hashMap
-			
-			
 			//this should go last in the method?
 			super.setup(context);
 		}
@@ -106,6 +86,9 @@ public class GetArticlesMapred {
 			// TODO: You should implement getting article mapper here
 			
 			String title = inputPage.getTitle();
+			
+			//COMMENTED OUT TOKENIZING THE TITLES
+			/*
 			String[] titleTokens = title.split(" ");
 			String currentCheck = "";
 			
@@ -117,20 +100,21 @@ public class GetArticlesMapred {
 					//trim the extra space
 					if(currentCheck.charAt(currentCheck.length() - 1) == ' ') {
 						currentCheck = currentCheck.substring(0, currentCheck.length() - 1);
-						//add if this section of the title is one of the names from people.txt
-						if(names.contains(currentCheck)) {
-							//map the title text and the page text
-							Text titleText = new Text();
-							Text pageText = new Text();
-							titleText.set(title);
-							pageText.set(inputPage.getContent());
+						*/
+			//add if this section of the title is one of the names from people.txt
+			if(names.contains(title)) {
+				//map the title text and the page text
+				Text titleText = new Text();
+				Text pageText = new Text();
+				titleText.set(title);
+				pageText.set(inputPage.getContent());
 							
-							context.write(titleText, pageText);
-						}
-					}
+				context.write(titleText, pageText);
+			}
+					/*}
 				}
 				currentCheck = "";
-			}
+			}*/
 			
 			//only map if title is in hashset of names
 			//context.add(offset, inputPage)
@@ -140,12 +124,9 @@ public class GetArticlesMapred {
 	public static void main(String[] args) throws Exception {
 		// TODO: you should implement the Job Configuration and Job call
 		
-		
-		//set up the arguments given by the user
 		Configuration conf = new Configuration();
 		
-		
-		
+		//set up the arguments given by the user
 		String[] otherArgs = new GenericOptionsParser(conf, args).getRemainingArgs();
 		
 		Job job = Job.getInstance(conf);
