@@ -1,12 +1,11 @@
 package code.lemma;
 
+import java.text.BreakIterator;
 import java.util.Arrays;
 import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Set;
-
-import edu.stanford.nlp.simple.Sentence;
 
 public class Tokenizer {
 
