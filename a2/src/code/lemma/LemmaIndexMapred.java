@@ -1,15 +1,20 @@
-package code.lemma;
+package lemmaindex;
 
 import java.io.IOException;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import org.apache.hadoop.conf.Configuration;
+import org.apache.hadoop.fs.Path;
 import org.apache.hadoop.io.LongWritable;
 import org.apache.hadoop.io.Text;
+import org.apache.hadoop.mapreduce.lib.input.FileInputFormat;
+import org.apache.hadoop.mapreduce.lib.output.FileOutputFormat;
+import org.apache.hadoop.mapreduce.Job;
 import org.apache.hadoop.mapreduce.Mapper;
 
-import util.StringIntegerList;
+//import util.StringIntegerList;
 import edu.umd.cloud9.collection.wikipedia.WikipediaPage;
 
 /**
@@ -35,12 +40,12 @@ public class LemmaIndexMapred {
 			
 			for(String str : list) {
 				lemma.set(str);
-				if(!index.isEmpty() && index.containsKey(lemma)) {
-					index.put(str, index.get(lemma) + 1);
+				if(!index.isEmpty() && index.containsKey(lemma.toString())) {
+					index.put(lemma.toString(), index.get(lemma.toString()) + 1);
 				} else {
-					index.put(str, 1);
+					index.put(lemma.toString(), 1);
 				}
-			} context.write(title, new StringIntegerList(index));
+			} context.write(new Text(title), new StringIntegerList(index));
 			
 		}
 	}
@@ -58,3 +63,4 @@ public class LemmaIndexMapred {
 		  System.exit(job.waitForCompletion(true) ? 0 : 1);
 	}
 }
+
