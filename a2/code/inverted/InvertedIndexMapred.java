@@ -43,6 +43,7 @@ public class InvertedIndexMapred {
 			articleIdKey = articleId.toString();
 			lemma_freqs = new StringIntegerList();
 			lemma_freqs.readFromString(indices.toString());
+			// For each StringInteger, extract the lemma and frequency.
 			for (StringInteger lemma_freq : lemma_freqs.getIndices()) {
 				lemma.set(lemma_freq.getString());
 				context.write(lemma, new StringInteger(articleIdKey, lemma_freq.getValue()));
@@ -66,6 +67,7 @@ public class InvertedIndexMapred {
 		public void reduce(Text lemma, Iterable<StringInteger> articlesAndFreqs, Context context)
 									throws IOException, InterruptedException {
 			temp = new ArrayList<StringInteger>();
+			// For each pair of article and frequency, add to ArrayList of StringIntegers.
 			for (StringInteger articleAndFreq : articlesAndFreqs) {
 				temp.add(new StringInteger(articleAndFreq.getString(), articleAndFreq.getValue()));
 			}
