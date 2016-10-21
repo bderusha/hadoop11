@@ -1,6 +1,9 @@
 package code.lemma;
 
 import java.io.IOException;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 import org.apache.hadoop.io.LongWritable;
 import org.apache.hadoop.io.Text;
@@ -16,7 +19,6 @@ import edu.umd.cloud9.collection.wikipedia.WikipediaPage;
  */
 public class LemmaIndexMapred {
 	public static class LemmaIndexMapper extends Mapper<LongWritable, WikipediaPage, Text, StringIntegerList> {
-		public StringIntegerList lemma_freq; 
 		public static Text lemma = new Text();
 		public Map<String, Integer> index = new HashMap<String, Integer>(); //map for counting lemma frequency
 		
@@ -34,11 +36,11 @@ public class LemmaIndexMapred {
 			for(String str : list) {
 				lemma.set(str);
 				if(!index.isEmpty() && index.containsKey(lemma)) {
-					index.put(lemma, index.get(lemma) + 1);
+					index.put(str, index.get(lemma) + 1);
 				} else {
-					index.put(lemma, 1);
+					index.put(str, 1);
 				}
-			} context.write(title, lemma_freq(index);
+			} context.write(title, new StringIntegerList(index));
 			
 		}
 	}
