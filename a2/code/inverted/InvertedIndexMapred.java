@@ -24,7 +24,9 @@ import util.StringIntegerList.StringInteger;
 
 public class InvertedIndexMapred {
 	
-	/* 
+	/*
+         * This class creates an index that maps an article to a <lemma, frequency> pair
+	 *
 	 * Input:
 	 * article1 <lemma1, frequency> <lemma2, frequency>
 	 * 
@@ -49,11 +51,14 @@ public class InvertedIndexMapred {
 	}
 	
 	/* 
+	 * This class creates the inverted index for one lemma mapping lemma to the article and frequency.
+	 *
 	 * Input:
 	 * lemma1 <article1, frequency>, <article2, frequency>
 	 * 
 	 * Output:
 	 * lemma1 {<article1, frequency>, <article2, frequency>}
+	 *
 	 */	
 	public static class InvertedIndexReducer extends Reducer<Text, StringInteger, Text, StringIntegerList> {
 		public static List<StringInteger> temp;
