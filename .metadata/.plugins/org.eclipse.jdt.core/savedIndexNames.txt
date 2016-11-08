@@ -1,0 +1,2 @@
+INDEX VERSION 1.129+/Users/williamderusha/src/brandeis/cosi129a/hadoop11/.metadata/.plugins/org.eclipse.jdt.core
+258401087.index
