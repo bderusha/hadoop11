@@ -142,7 +142,7 @@ public class ProfessionClassifier {
 					for (StringInteger lemma_freq: lemma_freqs.getIndices()) {
 						LemmaInfo lemma_info = dictionary.get(lemma_freq.getString());
 						// Set element at index specified in dictionary paired with TFIDF
-						vector.set(lemma_info.getIndex(), calculateTFIDF(lemma_freq));
+						vector.set(lemma_info.getIndex(), calculateTFIDF(lemma_freq.getString()));
 					}
 									
 					// Create a Mahout vector for each profession assigned to person.
@@ -163,7 +163,7 @@ public class ProfessionClassifier {
 	}
 	
 	// Naive TFIDF.
-	private static double calculateTFIDF(StringInteger lemma_freq) {
-		return dictionary.get(lemma_freq).getCount();
+	private static double calculateTFIDF(String lemma) {
+		return dictionary.get(lemma).getCount();
 	}
 }
