@@ -3,16 +3,51 @@
   <groupId>hadoop11</groupId>
   <artifactId>a3</artifactId>
   <version>0.0.1-SNAPSHOT</version>
-  <dependencies>
-  	<dependency>
-  		<groupId>org.apache.hadoop</groupId>
-  		<artifactId>hadoop-common</artifactId>
-  		<version>2.3.0</version>
-  	</dependency>
-  	<dependency>
-  		<groupId>org.apache.hadoop</groupId>
-  		<artifactId>hadoop-client</artifactId>
-  		<version>2.3.0</version>
-  	</dependency>	
-  </dependencies>
+
+  <build>
+        <plugins>
+            <!--Pack External Package within Jar-->
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-shade-plugin</artifactId>
+                <version>2.4</version>
+                <executions>
+                    <execution>
+                        <phase>package</phase>
+                        <goals>
+                            <goal>shade</goal>
+                        </goals>
+                    </execution>
+                </executions>
+            </plugin>
+        </plugins>
+    </build>
+
+    <dependencies>
+        <dependency>
+            <groupId>org.apache.hadoop</groupId>
+            <artifactId>hadoop-common</artifactId>
+            <version>2.3.0</version>
+        </dependency>
+        <dependency>
+            <groupId>org.apache.hadoop</groupId>
+            <artifactId>hadoop-mapreduce-client-core</artifactId>
+            <version>2.3.0</version>
+        </dependency>
+        <dependency>
+            <groupId>org.apache.mahout</groupId>
+            <artifactId>mahout-mr</artifactId>
+            <version>0.10.0</version>
+        </dependency>
+        <dependency>
+            <groupId>org.apache.commons</groupId>
+            <artifactId>commons-math3</artifactId>
+            <version>3.2</version>
+        </dependency>
+        <dependency>
+            <groupId>au.com.bytecode</groupId>
+            <artifactId>opencsv</artifactId>
+            <version>2.4</version>
+        </dependency>
+    </dependencies>
 </project>
