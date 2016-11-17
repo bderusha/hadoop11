@@ -12,6 +12,7 @@ import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.FileSystem;
 import org.apache.hadoop.fs.Path;
 import org.apache.hadoop.io.SequenceFile;
+import org.apache.hadoop.io.SequenceFile.Writer.Option;
 import org.apache.hadoop.io.Text;
 import org.apache.mahout.math.RandomAccessSparseVector;
 import org.apache.mahout.math.Vector;
@@ -27,7 +28,6 @@ public class ProfessionClassifier {
 	// A map <Person's name, Professions>
 	private static HashMap<String, String[]> professionals = new HashMap<String, String[]>();
 
-	// Arguments should be {Professions file, ARTICLE_LEMMA_INDEX file, Output file}
 	public static void main (String[] args) throws IOException {
 		Configuration conf = new Configuration();
 		loadProfessions(conf, args[0]);
@@ -36,13 +36,14 @@ public class ProfessionClassifier {
 	
 	// Load the list of people and their professions for the training set.
 	public static void loadProfessions(Configuration conf, String professionsFile) throws IOException {
-	        Path professionsPath = new Path (professionsFile);
+        Path professionsPath = new Path (professionsFile);
         
-        	// Load file contents into HashMap for use by the mapper.
-        	FileSystem fs = FileSystem.get(conf);
-        	BufferedReader reader=new BufferedReader(new InputStreamReader(fs.open(professionsPath)));
+        // Load file contents into HashMap for use by the mapper.
+        FileSystem fs = FileSystem.get(conf);
+        BufferedReader reader = null;
         
 		try {
+			reader = new BufferedReader(new InputStreamReader(fs.open(professionsPath)));
 			String line;
 			
 			while ((line = reader.readLine()) != null) {
@@ -53,7 +54,11 @@ public class ProfessionClassifier {
 			}
 			
 		} finally {
-			reader.close();
+			try {
+				if (reader != null) {
+					reader.close();
+				}
+			} catch (IOException e) {}
 		}
 	}
 	
@@ -66,10 +71,14 @@ public class ProfessionClassifier {
 		
 		fs.delete(seqFilePath,false);
 		
-		// Deprecated?
-		SequenceFile.Writer writer = SequenceFile.createWriter(fs, conf, seqFilePath, Text.class, VectorWritable.class);
+		SequenceFile.Writer writer = null;
 
 		try {
+			Option optPath = SequenceFile.Writer.file(seqFilePath);
+		    Option optKey = SequenceFile.Writer.keyClass(Text.class);
+		    Option optVal = SequenceFile.Writer.valueClass(VectorWritable.class);
+		    writer = SequenceFile.createWriter(conf, optPath, optKey, optVal);
+		    
 			List<MahoutVector> mahout_vectors = vectorize(indexFile);
 			
 			for (MahoutVector mahout_vector : mahout_vectors) {
@@ -79,17 +88,22 @@ public class ProfessionClassifier {
 			}
 			
 		} finally {
-			writer.close();
+			try {
+				if (writer != null) {
+					writer.close();
+				}
+			} catch (IOException e) {}
 		}
 	}
 	
 	// Parse through ARTICLE_LEMMA_INDEX and create dictionary of all lemmas appearing in corpus.
 	private static void createDictionary(String indexFile) throws IOException {
 		
-		BufferedReader reader = new BufferedReader(new FileReader(indexFile));
-		String line;
+		BufferedReader reader = null;
 		
 		try {
+			String line;
+			reader =  new BufferedReader(new FileReader(indexFile));
 			// Line consists of: Person name<\t>StringIntegerList
 			while ((line = reader.readLine()) != null) {
 				
@@ -114,7 +128,11 @@ public class ProfessionClassifier {
 
 			}
 		} finally {
-			reader.close();
+			try {
+				if (reader != null) {
+					reader.close();
+				}
+			} catch (IOException e) {}
 		}
 	}
 	
@@ -122,11 +140,12 @@ public class ProfessionClassifier {
 		
 		// List of vectors of a profession and lemmas associated with the profession.
 		List<MahoutVector> mahout_vectors = new ArrayList<MahoutVector>();
-		BufferedReader reader = new BufferedReader(new FileReader(indexFile));
-		String line;
+		BufferedReader reader = null;
 		
 		try {
 			// Line consists of: Person name<\t>StringIntegerList
+			reader = new BufferedReader(new FileReader(indexFile));
+			String line;
 			while ((line = reader.readLine()) != null) {
 		
 				String[] entry = line.split("\t");
@@ -156,9 +175,14 @@ public class ProfessionClassifier {
 				}
 			}		
 		} finally {
-			reader.close();
-			return mahout_vectors;
+			try {
+				if (reader != null) {
+					reader.close();
+				}
+			} catch (IOException e) {}
 		}
+		
+		return mahout_vectors;
 		
 	}
 	
