@@ -43,10 +43,10 @@ val rank = 10
 val numIterations = 10
 val model = ALS.train(ratings, rank, numIterations, 0.01)
 
-int N = 10;
+val N = 10;
 
 val recommendations: RDD[(String, Double)]  = productIds.map(baseId =>
-    int baseIdInt = productIds.indexOf(baseId)
+    val baseIdInt = productIds.indexOf(baseId)
     val baseItemFactor = model.productFeatures.lookup(baseIdInt).head
     // Get features of the base item as a vector
     val baseItemVector = new DoubleMatrix(baseItemFactor)
