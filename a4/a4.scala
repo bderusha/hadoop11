@@ -1,5 +1,9 @@
 import org.apache.spark.mllib.recommendation.ALS
 import org.apache.spark.mllib.recommendation.Rating
+import org.apache.spark.SparkConf
+import org.apache.spark.SparkContext
+
+import org.jblas.DoubleMatrix
 
 val reviews = sc.textFile("hdfs:///shared3/data-small.txt")
 val items = sc.textFile("hdfs:///shared3/items.txt")
@@ -47,8 +51,9 @@ val N = 10;
 
 val recommendations: RDD[(String, Double)]  = productIds.map(baseId =>
     val baseIdInt = productIds.indexOf(baseId)
+    // Lookup the feature array of the item represented as Array[Double] 
     val baseItemFactor = model.productFeatures.lookup(baseIdInt).head
-    // Get features of the base item as a vector
+    // Put feature array in a vector (or one dimensional DoubleMatrix in jblas)
     val baseItemVector = new DoubleMatrix(baseItemFactor)
     // Find how similar the base item is to every item
     val similarities = model.productFeatures.map{ case (testIdInt, testItemFactor) =>
@@ -56,7 +61,7 @@ val recommendations: RDD[(String, Double)]  = productIds.map(baseId =>
       val testItemVector = new DoubleMatrix(testItemFactor)
       // Compute a similarity score between the two vectors using cosine similarity
       val similarity = cosineSimilarity(baseItemVector, testItemVector)
-      // Output a tuple of the test item and its similarity score
+      // Output a tuple of the test item and its similarity score with the base item
       val testId = productIds(testIdInt)
       (testId, similarity)
     }
@@ -73,6 +78,7 @@ val recommendations: RDD[(String, Double)]  = productIds.map(baseId =>
 )
 
 // Given the feature vectors of two items, return a double similarity score.
+// Compute the dot product of the two vectors and divide by the product of the lengths.
 def cosineSimilarity(vec1: DoubleMatrix, vec2: DoubleMatrix): Double = {
   vec1.dot(vec2) / (vec1.norm2() * vec2.norm2())
 }
