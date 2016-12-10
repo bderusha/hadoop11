@@ -59,33 +59,31 @@ object a4 {
 
     val recommendations  = productIds.map{baseId =>
       val baseIdInt = productIds.indexOf(baseId)
-        // Lookup the feature array of the item represented as Array[Double] 
-        val baseItemFactor = model.productFeatures.lookup(baseIdInt).head
-        // Put feature array in a vector (or one dimensional DoubleMatrix in jblas)
-        val baseItemVector = new DoubleMatrix(baseItemFactor)
-        // Find how similar the base item is to every item
-        val similarities: RDD[(String, Double)]= model.productFeatures.map{ case (testIdInt, testItemFactor) =>
-          // Get features of the test item as a vector
-          val testItemVector = new DoubleMatrix(testItemFactor)
-          // Compute a similarity score between the two vectors using cosine similarity
-          val similarity = cosineSimilarity(baseItemVector, testItemVector)
-          // Output a tuple of the test item and its similarity score with the base item
-          val testId = productIds(testIdInt)
-          (testId, similarity)
-        }
-        // First, the base item itself will be included with top similarity score of 1 so exclude this
-        val recs = similarities.filter{ case(testId, similarity) => baseId != testId}
-          // Order by descending order of similarity score and get the top N elements
-          .top(N)(Ordering.by[(String, Double), Double]) {case (testId, similarity) => similarity}
-          // Map each of the top N elements to its itemId
-          .map {case(testId, similarity) => testId}
-          // Collect recommendations to list
-          .toList
-        // Final output: <Product>,<Recommended Product>,<Recommended Product>,...
-        val output = baseId + "," + recs.mkString(",")
+      // Lookup the feature array of the item represented as Array[Double] 
+      val baseItemFactor = model.productFeatures.lookup(baseIdInt).head
+      // Put feature array in a vector (or one dimensional DoubleMatrix in jblas)
+      val baseItemVector = new DoubleMatrix(baseItemFactor)
+      // Find how similar the base item is to every item
+      val similarities: RDD[(String, Double)]= model.productFeatures.map{ case (testIdInt, testItemFactor) =>
+        // Get features of the test item as a vector
+        val testItemVector = new DoubleMatrix(testItemFactor)
+        // Compute a similarity score between the two vectors using cosine similarity
+        val similarity = cosineSimilarity(baseItemVector, testItemVector)
+        // Output a tuple of the test item and its similarity score with the base item
+        val testId = productIds(testIdInt)
+        (testId, similarity)
       }
-
-      .forEach(println)
+      // First, the base item itself will be included with top similarity score of 1 so exclude this
+      val recs = similarities.filter{ case(testId, similarity) => baseId != testId}
+        // Order by descending order of similarity score and get the top N elements
+        .top(N)(Ordering.by[(String, Double), Double]) {case (testId, similarity) => similarity}
+        // Map each of the top N elements to its itemId
+        .map {case(testId, similarity) => testId}
+        // Collect recommendations to list
+        .toList
+      // Final output: <Product>,<Recommended Product>,<Recommended Product>,...
+      val output = baseId + "," + recs.mkString(",")
+      }.forEach(println)
 
     // Given the feature vectors of two items, return a double similarity score.
     // Compute the dot product of the two vectors and divide by the product of the lengths.
