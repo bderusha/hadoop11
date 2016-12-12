@@ -2,6 +2,7 @@ import org.apache.spark.mllib.recommendation.ALS
 import org.apache.spark.mllib.recommendation.Rating
 import org.apache.spark.SparkConf
 import org.apache.spark.SparkContext
+import org.apache.spark.rdd.RDD
 
 import org.jblas.DoubleMatrix
 
@@ -80,14 +81,18 @@ object a4 {
       // First, the base item itself will be included with top similarity score of 1 so exclude this
       val recs = similarities.filter{ case(testId, similarity) => baseId != testId}
         // Order by descending order of similarity score and get the top N elements
-        .top(N)(Ordering.by[(String, Double), Double]) {case (testId, similarity) => similarity}
+        .top(N)(Ordering.by[(String, Double), Double] {case (testId, similarity) => similarity})
         // Map each of the top N elements to its itemId
         .map {case(testId, similarity) => testId}
         // Collect recommendations to list
         .toList
       // Final output: <Product>,<Recommended Product>,<Recommended Product>,...
       val output = baseId + "," + recs.mkString(",")
-      }.foreach(println)
+
+      output
+    }
+
+    sc.parallelize(recommendations).saveAsTextFile("/user/hadoop11/a4results/test1")
 
     // Given the feature vectors of two items, return a double similarity score.
     // Compute the dot product of the two vectors and divide by the product of the lengths.
