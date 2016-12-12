@@ -10,11 +10,14 @@ object a4 {
   def main(args: Array[String]): Unit = {
 
     // Initialize Spark
-    val conf = new SparkConf().setAppName("Assignment4").setMaster(master)
-    val sc = new SparkContext(conf)
+    // val conf = new SparkConf().setAppName("Assignment4").setMaster(master)
+    // val sc = new SparkContext(conf)
 
-    val reviews = sc.textFile(args(0))
-    val items = sc.textFile(args(1))
+    // val reviews = sc.textFile(args(0))
+    // val items = sc.textFile(args(1))
+    val reviews = sc.textFile("hdfs:///shared3/data-small.txt")
+    val items = sc.textFile("hdfs:///shared3/items.txt")
+
 
     // Take a very small dataset for now as a sample data set
     // In practice we will use the whole file
@@ -53,7 +56,8 @@ object a4 {
     // Build the recommendation model using ALS
     val rank = 10
     val numIterations = 10
-    val model = ALS.train(ratings, rank, numIterations, 0.01)
+    val ratingsRDD = sc.parallelize(ratings)
+    val model = ALS.train(ratingsRDD, rank, numIterations, 0.01)
 
     val N = 10;
 
@@ -83,7 +87,7 @@ object a4 {
         .toList
       // Final output: <Product>,<Recommended Product>,<Recommended Product>,...
       val output = baseId + "," + recs.mkString(",")
-      }.forEach(println)
+      }.foreach(println)
 
     // Given the feature vectors of two items, return a double similarity score.
     // Compute the dot product of the two vectors and divide by the product of the lengths.
