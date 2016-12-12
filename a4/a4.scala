@@ -48,9 +48,17 @@ import org.jblas.DoubleMatrix
 
     // We will need a list of just product and user ids so we have an Int index to pass to the recommender
     val productIds = multi_entry_data.map(_(0)).distinct
+    // (k,v) amazonID => index
+    val productMap = (productIds zip productIds.indices).toMap
+    // (k,v) index => amazonID
+    val reverseProductMap = productMap.map(_.swap)
+    // User ids are only necessary for creating the integer ids
     val userIds = multi_entry_data.map(_(1)).distinct
+    val userMap = (userIds zip userIds.indices).toMap
+    println("maps created")
 
-    val ratings = multi_entry_data.map { case Array(productId, userId, rating) => Rating(userIds.indexOf(userId), productIds.indexOf(productId), rating.toDouble) }
+    // val ratings = multi_entry_data.map { case Array(productId, userId, rating) => Rating(userIds.indexOf(userId), productIds.indexOf(productId), rating.toDouble) }
+    val ratings = multi_entry_data.map { case Array(productId, userId, rating) => Rating(userMap(userId), productMap(productId), rating.toDouble) }
 
     // COMMENT: I don't think we need to split create a training and test set, since there is no way of confirming
     // the correctness of our recommendations on the test set.
@@ -67,7 +75,8 @@ import org.jblas.DoubleMatrix
     val N = 10;
 
     val recommendations  = productIds.map{baseId =>
-      val baseIdInt = productIds.indexOf(baseId)
+    //   val baseIdInt = productIds.indexOf(baseId)
+      val baseIdInt = productMap(baseId)
       // Lookup the feature array of the item represented as Array[Double]
       val baseItemFactor = model.productFeatures.lookup(baseIdInt).head
       // Put feature array in a vector (or one dimensional DoubleMatrix in jblas)
@@ -79,7 +88,8 @@ import org.jblas.DoubleMatrix
         // Compute a similarity score between the two vectors using cosine similarity
         val similarity = cosineSimilarity(baseItemVector, testItemVector)
         // Output a tuple of the test item and its similarity score with the base item
-        val testId = productIds(testIdInt)
+        // val testId = productIds(testIdInt)
+        val testId = reverseProductMap(testIdInt)
         (testId, similarity)
       }
       // First, the base item itself will be included with top similarity score of 1 so exclude this
